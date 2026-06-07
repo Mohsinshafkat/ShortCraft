@@ -1,9 +1,9 @@
 const express = require('express');
+const https = require('https');
 
 const app = express();
 app.use(express.json());
 
-// Central API Key setting (Vercel dashboard se connected)
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // Frontend HTML Interface
@@ -180,41 +180,56 @@ function renderResults(data) {
   `);
 });
 
-// Secure Backend Route
-app.post('/api/generate-shorts', async (req, res) => {
+// Secure Backend Route using Native HTTPS
+app.post('/api/generate-shorts', (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'URL is required' });
   if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Server API key setup is missing' });
 
-  try {
-    const fetch = (await import('node-fetch')).default;
-    
-    const prompt = `You are a viral short-form video expert. Analyze this video link: ${url}. Produce exactly 10 perfect TikTok clips. Output strictly as a raw JSON array format only, with no markdown backticks: [{"title":"clip title","hook":"punchy hook","start":"00:01:00","end":"00:01:30","caption":"viral text content"}].`;
+  const prompt = `You are a viral short-form video expert. Analyze this video link: ${url}. Produce exactly 10 perfect TikTok clips. Output strictly as a raw JSON array format only, with no markdown backticks: [{"title":"clip title","hook":"punchy hook","start":"00:01:00","end":"00:01:30","caption":"viral text content"}].`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+  const postData = JSON.stringify({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 4000,
+    messages: [{ role: 'user', content: prompt }]
+  });
+
+  const options = {
+    hostname: 'api.anthropic.com',
+    path: '/v1/messages',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'Content-Length': Buffer.byteLength(postData)
+    }
+  };
+
+  const request = https.request(options, (response) => {
+    let data = '';
+    response.on('data', (chunk) => { data += chunk; });
+    response.on('end', () => {
+      try {
+        const parsedData = JSON.parse(data);
+        if (response.statusCode !== 200) {
+          return res.status(response.statusCode).json({ error: parsedData.error?.message || 'Anthropic API Error' });
+        }
+        const rawText = parsedData.content[0].text.trim();
+        const shortsData = JSON.parse(rawText);
+        res.json({ shorts: shortsData });
+      } catch (error) {
+        res.status(500).json({ error: 'Failed to parse API response' });
+      }
     });
+  });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'Anthropic API Error');
-
-    const rawText = data.content[0].text.trim();
-    const shortsData = JSON.parse(rawText);
-
-    res.json({ shorts: shortsData });
-  } catch (error) {
+  request.on('error', (error) => {
     res.status(500).json({ error: error.message });
-  }
+  });
+
+  request.write(postData);
+  request.end();
 });
 
 module.exports = app;
