@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#08080f">
+<title>ShortCraft AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#08080f; --surface:#101018; --card:#13131e; --border:#1f1f30;
+  --accent:#ff2d55; --green:#00e676; --blue:#448aff; --text:#f5f5fa;
+  --muted:#5a5a78; --sub:#8888a8; --r:14px;
+  --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace; --display:'Bebas Neue',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;padding-bottom:50px;}
+.page{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:0 16px;}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+.logo-name{font-family:var(--display);font-size:24px;letter-spacing:1px;line-height:1;}
+.logo-name span{color:var(--accent);}
+.live-badge{font-family:var(--mono);font-size:10px;color:var(--green);background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:100px;padding:4px 10px;display:flex;align-items:center;gap:5px;}
+.pdot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* HERO */
+.hero{padding:24px 0 20px;text-align:center;}
+.hero h1{font-family:var(--display);font-size:50px;line-height:0.95;letter-spacing:2px;margin-bottom:12px;}
+.hero h1 .red{color:var(--accent);}
+.hero-sub{font-size:13px;color:var(--sub);line-height:1.7;max-width:300px;margin:0 auto 18px;}
+.pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+.pill{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:100px;padding:4px 10px;}
+.pill.on{color:var(--accent);border-color:rgba(255,45,85,0.3);background:rgba(255,45,85,0.06);}
+
+/* API KEY INPUT */
+.apikey-section{background:var(--card);border:1px solid rgba(255,214,0,0.2);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.apikey-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.apikey-icon{font-size:16px;}
+.apikey-title{font-size:13px;font-weight:700;color:#ffd600;}
+.apikey-note{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+.apikey-note a{color:var(--blue);text-decoration:none;}
+.key-row{display:flex;gap:8px;}
+.key-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;}
+.key-input:focus{border-color:#ffd600;}
+.key-input::placeholder{color:var(--muted);}
+.btn-save-key{background:rgba(255,214,0,0.1);border:1px solid rgba(255,214,0,0.3);color:#ffd600;border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;}
+.key-saved{display:none;font-family:var(--mono);font-size:11px;color:var(--green);margin-top:8px;}
+
+/* INPUT CARD */
+.input-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:12px;position:relative;overflow:hidden;}
+.input-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--blue),var(--green));}
+.input-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:block;}
+.url-box{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;transition:border-color 0.2s;}
+.url-box:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(68,138,255,0.1);}
+.url-input{flex:1;background:transparent;border:none;outline:none;padding:13px 14px;color:var(--text);font-family:var(--mono);font-size:11px;}
+.url-input::placeholder{color:var(--muted);}
+.paste-btn{background:rgba(68,138,255,0.1);border:none;border-left:1px solid var(--border);color:var(--blue);font-family:var(--mono);font-size:11px;padding:0 14px;cursor:pointer;white-space:nowrap;}
+.paste-btn:active{background:rgba(68,138,255,0.2);}
+.btn-main{width:100%;background:var(--accent);border:none;border-radius:10px;padding:15px;color:white;font-family:var(--display);font-size:20px;letter-spacing:1px;cursor:pointer;transition:all 0.2s;}
+.btn-main:active{transform:scale(0.98);}
+.btn-main:disabled{opacity:0.5;}
+
+/* HOW IT WORKS */
+.how-section{margin-bottom:16px;}
+.section-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.steps-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.step-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;}
+.step-emoji{font-size:18px;margin-bottom:5px;}
+.step-label{font-size:10px;color:var(--sub);line-height:1.4;}
+
+/* STATUS */
+#status-section{display:none;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:12px;}
+.status-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.status-txt{font-size:14px;font-weight:600;}
+.progress-list{display:flex;flex-direction:column;gap:7px;}
+.p-step{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-family:var(--mono);font-size:11px;background:var(--surface);border:1px solid transparent;transition:all 0.3s;color:var(--muted);}
+.p-step.active{border-color:rgba(68,138,255,0.4);color:var(--text);}
+.p-step.done{border-color:rgba(0,230,118,0.3);color:var(--green);}
+
+/* ERROR */
+.error-card{display:none;background:rgba(255,45,85,0.07);border:1px solid rgba(255,45,85,0.25);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--accent);margin-bottom:12px;line-height:1.6;}
+
+/* RESULTS */
+#results-section{display:none;}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.results-title{font-family:var(--display);font-size:28px;letter-spacing:1px;}
+.count-badge{background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:100px;padding:4px 12px;font-family:var(--mono);font-size:11px;color:var(--green);}
+
+.info-box{background:rgba(68,138,255,0.06);border:1px solid rgba(68,138,255,0.2);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:12px;color:var(--sub);line-height:1.7;}
+.info-box strong{color:var(--blue);}
+
+/* SHORTS */
+.shorts-list{display:flex;flex-direction:column;gap:14px;}
+.short-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:slideUp 0.35s ease both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* TikTok 9:16 preview */
+.tiktok-preview{position:relative;width:100%;aspect-ratio:9/16;max-height:320px;overflow:hidden;cursor:pointer;}
+.preview-bg{position:absolute;inset:0;}
+.preview-content{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:14px;}
+.preview-top-row{display:flex;justify-content:space-between;}
+.badge-num{background:var(--accent);color:white;font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px;}
+.badge-dur{background:rgba(0,0,0,0.55);color:var(--green);font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px;border:1px solid rgba(0,230,118,0.25);}
+.preview-mid{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.play-ring{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.hook-text{font-family:var(--display);font-size:18px;letter-spacing:0.5px;text-align:center;color:white;text-shadow:0 2px 8px rgba(0,0,0,0.9);padding:0 8px;line-height:1.2;}
+.caption-bar{background:rgba(0,0,0,0.72);border-radius:8px;padding:10px 12px;}
+.cap-label{font-family:var(--mono);font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.cap-preview{font-size:11px;color:rgba(255,255,255,0.88);line-height:1.5;}
+
+/* Card body */
+.card-body{padding:16px;}
+.card-title{font-size:14px;font-weight:700;margin-bottom:8px;line-height:1.3;}
+.card-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.meta-chip{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:2px 7px;}
+.ts-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.ts-badge{font-family:var(--mono);font-size:11px;color:var(--blue);background:rgba(68,138,255,0.08);border:1px solid rgba(68,138,255,0.2);border-radius:6px;padding:4px 10px;}
+.ts-arrow{color:var(--muted);font-size:12px;}
+.full-cap-box{background:var(--surface);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;font-family:var(--mono);color:var(--sub);line-height:1.6;margin-bottom:14px;}
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.btn-act{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:9px;border:none;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all 0.18s;}
+.btn-act:active{transform:scale(0.96);}
+.btn-srt{background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.25);color:var(--green);}
+.btn-cap{background:rgba(68,138,255,0.08);border:1px solid rgba(68,138,255,0.25);color:var(--blue);}
+.btn-capcut{width:100%;background:linear-gradient(135deg,#ff2d55,#ff6b35);color:white;font-size:13px;padding:13px;border-radius:9px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font);font-weight:700;transition:all 0.18s;}
+.btn-capcut:active{transform:scale(0.97);}
+
+/* Guide */
+.capcut-guide{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin:16px 0;}
+.guide-title{font-family:var(--display);font-size:22px;letter-spacing:0.5px;margin-bottom:4px;}
+.guide-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.guide-steps{display:flex;flex-direction:column;gap:10px;}
+.guide-step{display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);}
+.guide-num{width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:white;flex-shrink:0;margin-top:1px;}
+.guide-text{font-size:12px;color:var(--sub);line-height:1.6;}
+.guide-text strong{color:var(--text);}
+
+/* Download all */
+.dl-all-card{background:linear-gradient(135deg,rgba(68,138,255,0.08),rgba(255,45,85,0.05));border:1px solid rgba(68,138,255,0.2);border-radius:var(--r);padding:20px;margin:16px 0;text-align:center;}
+.da-title{font-family:var(--display);font-size:22px;letter-spacing:0.5px;margin-bottom:4px;}
+.da-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.btn-dl-all{width:100%;background:var(--blue);border:none;border-radius:10px;padding:14px;color:white;font-family:var(--display);font-size:20px;letter-spacing:1px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-dl-all:active{transform:scale(0.98);}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;font-family:var(--mono);font-size:12px;font-weight:500;padding:10px 20px;border-radius:100px;opacity:0;transition:all 0.3s;z-index:9999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-mark">✂</div>
+      <div class="logo-name">Short<span>Craft</span></div>
+    </div>
+    <div class="live-badge"><div class="pdot"></div>AI LIVE</div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1><span class="red">10 VIRAL</span><br><span style="color:var(--text)">SHORTS</span><br><span class="red">INSTANTLY</span></h1>
+    <p class="hero-sub">Paste any YouTube link. AI finds the best moments, writes captions, and guides you to edit in CapCut — free, no install.</p>
+    <div class="pills">
+      <div class="pill on">9:16 TikTok</div>
+      <div class="pill on">30 Sec</div>
+      <div class="pill on">Auto Caption</div>
+      <div class="pill">No Install</div>
+      <div class="pill">HD Quality</div>
+    </div>
+  </div>
+
+  <!-- API KEY SECTION -->
+  <div class="apikey-section" id="apiKeySection">
+    <div class="apikey-header">
+      <div class="apikey-icon">🔑</div>
+      <div class="apikey-title">Anthropic API Key Required</div>
+    </div>
+    <div class="apikey-note">
+      Get your free API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a><br>
+      Your key stays on your device only — never sent anywhere else.
+    </div>
+    <div class="key-row">
+      <input class="key-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+      <button class="btn-save-key" onclick="saveKey()">Save</button>
+    </div>
+    <div class="key-saved" id="keySaved">✅ API Key saved!</div>
+  </div>
+
+  <!-- URL INPUT -->
+  <div class="input-card">
+    <span class="input-label">YouTube Video Link</span>
+    <div class="url-box">
+      <input class="url-input" type="url" id="urlInput" placeholder="youtube.com/watch?v=..." autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <button class="paste-btn" onclick="pasteURL()">📋 Paste</button>
+    </div>
+    <button class="btn-main" id="mainBtn" onclick="generate()">⚡ GENERATE 10 SHORTS</button>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="section-label">How it works</div>
+    <div class="steps-row">
+      <div class="step-box"><div class="step-emoji">🔗</div><div class="step-label">Paste YouTube Link</div></div>
+      <div class="step-box"><div class="step-emoji">🧠</div><div class="step-label">AI Finds Best Moments</div></div>
+      <div class="step-box"><div class="step-emoji">📝</div><div class="step-label">Get Captions & Times</div></div>
+      <div class="step-box"><div class="step-emoji">✂️</div><div class="step-label">Edit in CapCut Free</div></div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-card" id="errorCard"></div>
+
+  <!-- STATUS -->
+  <div id="status-section">
+    <div class="status-top">
+      <div class="spinner"></div>
+      <div class="status-txt" id="statusTxt">Analyzing...</div>
+    </div>
+    <div class="progress-list">
+      <div class="p-step" id="ps1">📡 Fetching video info</div>
+      <div class="p-step" id="ps2">🧠 AI analyzing key moments</div>
+      <div class="p-step" id="ps3">✂️ Creating 10 segments</div>
+      <div class="p-step" id="ps4">📝 Writing captions & hooks</div>
+      <div class="p-step" id="ps5">✅ Finalizing your shorts</div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-section">
+    <div class="results-header">
+      <div class="results-title">YOUR SHORTS</div>
+      <div class="count-badge" id="countBadge">10 Ready ✅</div>
+    </div>
+    <div class="info-box">
+      <strong>📱 How to use:</strong><br>
+      1. Tap <strong>"Open CapCut"</strong> on any short<br>
+      2. Import your YouTube video in CapCut<br>
+      3. Trim to the timestamp shown<br>
+      4. Paste the caption as text overlay<br>
+      5. Export 1080×1920 → Upload! 🎉
+    </div>
+    <div class="shorts-list" id="shortsList"></div>
+    <div class="capcut-guide">
+      <div class="guide-title">✂️ CapCut Guide</div>
+      <div class="guide-sub">Edit your shorts in CapCut — free on iOS & Android</div>
+      <div class="guide-steps">
+        <div class="guide-step"><div class="guide-num">1</div><div class="guide-text"><strong>Download YouTube video</strong> using SaveFrom.net or any YouTube downloader app → save to your phone</div></div>
+        <div class="guide-step"><div class="guide-num">2</div><div class="guide-text">Open <strong>CapCut → New Project</strong> → import the downloaded video</div></div>
+        <div class="guide-step"><div class="guide-num">3</div><div class="guide-text">Tap timeline → <strong>Split</strong> at start time, split at end time → delete the rest, keep only 30 seconds</div></div>
+        <div class="guide-step"><div class="guide-num">4</div><div class="guide-text">Tap <strong>Text → Add Text</strong> → paste the caption → place at bottom center</div></div>
+        <div class="guide-step"><div class="guide-num">5</div><div class="guide-text">Tap <strong>Ratio → 9:16</strong> → <strong>Export → 1080p</strong> → upload to TikTok/Reels/Shorts!</div></div>
+      </div>
+    </div>
+    <div class="dl-all-card">
+      <div class="da-title">📦 ALL CAPTIONS</div>
+      <div class="da-sub">Download all 10 captions as a text file</div>
+      <button class="btn-dl-all" onclick="downloadAll()">⬇ DOWNLOAD ALL</button>
+    </div>
+  </div>
+
+</div><!-- /page -->
+<div class="toast" id="toast"></div>
+
+<script>
+let shorts = [];
+let vidTitle = '';
+
+const GRADS = [
+  'linear-gradient(170deg,#1a0030,#000520)',
+  'linear-gradient(170deg,#200010,#000520)',
+  'linear-gradient(170deg,#001a10,#000520)',
+  'linear-gradient(170deg,#1a1000,#000520)',
+  'linear-gradient(170deg,#00101a,#050010)',
+  'linear-gradient(170deg,#10001a,#000a10)',
+  'linear-gradient(170deg,#1a0010,#000510)',
+  'linear-gradient(170deg,#001010,#050005)',
+  'linear-gradient(170deg,#0a0020,#000510)',
+  'linear-gradient(170deg,#1a0500,#000510)',
+];
+
+// ── API KEY ──
+function saveKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (!k.startsWith('sk-ant-')) { showError('Invalid key format. Should start with sk-ant-'); return; }
+  localStorage.setItem('sc_api_key', k);
+  document.getElementById('keySaved').style.display = 'block';
+  document.getElementById('apiKeySection').style.borderColor = 'rgba(0,230,118,0.3)';
+  showToast('API Key saved!');
+  showError('');
+}
+
+function getKey() {
+  return localStorage.getItem('sc_api_key') || '';
+}
+
+// On load — show saved key status
+window.addEventListener('load', () => {
+  const saved = getKey();
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    document.getElementById('keySaved').style.display = 'block';
+    document.getElementById('apiKeySection').style.borderColor = 'rgba(0,230,118,0.3)';
+  }
+});
+
+// ── UTILS ──
+function getVideoId(url) {
+  const patterns = [
+    /youtu\.be\/([^?&\s]+)/,
+    /youtube\.com\/watch\?v=([^&\s]+)/,
+    /youtube\.com\/shorts\/([^?&\s]+)/,
+    /youtube\.com\/embed\/([^?&\s]+)/,
+  ];
+  for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
+  return null;
+}
+
+async function pasteURL() {
+  try {
+    const t = await navigator.clipboard.readText();
+    document.getElementById('urlInput').value = t;
+  } catch(e) { showToast('Long-press input → Paste'); }
+}
+
+function setStep(n) {
+  ['ps1','ps2','ps3','ps4','ps5'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    if (i < n) el.className = 'p-step done';
+    else if (i === n) el.className = 'p-step active';
+    else el.className = 'p-step';
+  });
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ── MAIN GENERATE ──
+async function generate() {
+  const url = document.getElementById('urlInput').value.trim();
+  const apiKey = getKey();
+  showError('');
+
+  if (!apiKey) { showError('Please enter your Anthropic API key above first.'); return; }
+  if (!url) { showError('Please paste a YouTube link first.'); return; }
+  const vid = getVideoId(url);
+  if (!vid) { showError('Invalid YouTube link. Example: youtube.com/watch?v=xxxxx'); return; }
+
+  const btn = document.getElementById('mainBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ ANALYZING...';
+  document.getElementById('status-section').style.display = 'block';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('shortsList').innerHTML = '';
+  shorts = [];
+
+  try {
+    setStep(0);
+    document.getElementById('statusTxt').textContent = 'Fetching video info...';
+    await sleep(400);
+
+    // Get title via oEmbed (no auth needed)
+    let title = 'YouTube Video';
+    try {
+      const r = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${vid}&format=json`);
+      if (r.ok) { const d = await r.json(); title = d.title || title; }
+    } catch(e) {}
+    vidTitle = title;
+
+    setStep(1);
+    document.getElementById('statusTxt').textContent = 'AI finding best moments...';
+    await sleep(300);
+
+    const result = await callClaude(apiKey, url, vid, title);
+
+    setStep(2);
+    document.getElementById('statusTxt').textContent = 'Creating segments...';
+    await sleep(250);
+    setStep(3);
+    document.getElementById('statusTxt').textContent = 'Writing captions...';
+    await sleep(250);
+    setStep(4);
+    document.getElementById('statusTxt').textContent = 'Almost done...';
+    await sleep(200);
+
+    shorts = result;
+    renderResults(result);
+
+  } catch(err) {
+    document.getElementById('status-section').style.display = 'none';
+    showError(err.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '⚡ GENERATE 10 SHORTS';
+}
+
+// ── CLAUDE API CALL ──
+async function callClaude(apiKey, url, vid, title) {
+
+  const prompt = `You are a viral short-form video expert. Analyze this YouTube video and produce 10 perfect TikTok/Shorts clips.
+
+Video Title: "${title}"
+URL: ${url}
+
+RULES:
+- Exactly 10 shorts
+- Each = exactly 30 seconds (start to end)
+- Pick the MOST valuable, engaging, surprising moments only — no intros, outros, fluff
+- Spread timestamps across the full video (early, middle, late)
+- Each short needs: a hook (≤8 bold words), a caption (realistic spoken words for those 30s — 2–4 natural sentences), topic, why it will go viral
+- Timestamps must be realistic for a long YouTube video
+
+OUTPUT: Return ONLY a raw JSON array. No markdown. No backticks. No explanation. Just the array starting with [ and ending with ]:
+
+[{"n":1,"title":"Short title","hook":"Punchy hook line","start":"00:03:10","end":"00:03:40","caption":"Full spoken caption text for the 30 seconds. Natural sentences as if transcribed. Two to four sentences.","topic":"What this covers","viral":"Why viewers will watch"}]
+
+Generate all 10. Only JSON array output.`;
+
+  let response;
+  try {
+    response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+  } catch(e) {
+    throw new Error('Network error. Check your internet connection and try again.');
+  }
+
+  if (!response.ok) {
+    let errMsg = `API error ${response.status}`;
+    try {
+      const errData = await response.json();
+      if (errData.error?.message) errMsg = errData.error.message;
+      if (response.status === 401) errMsg = 'Invalid API key. Please check and re-enter.';
+      if (response.status === 429) errMsg = 'Rate limit reached. Wait a moment and try again.';
+    } catch(e) {}
+    throw new Error(errMsg);
+  }
+
+  const data = await response.json();
+  const raw = (data.content || []).map(b => b.text || '').join('').trim();
+
+  if (!raw) throw new Error('AI returned empty response. Please try again.');
+
+  // Extract JSON array robustly
+  const s = raw.indexOf('[');
+  const e = raw.lastIndexOf(']');
+  if (s === -1 || e === -1 || e <= s) {
+    console.error('Raw response:', raw);
+    throw new Error('AI response format error. Please try again.');
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw.slice(s, e + 1));
+  } catch(jsonErr) {
+    console.error('JSON parse error:', jsonErr, 'Raw:', raw.slice(s, e+1));
+    throw new Error('Could not parse AI response. Please try again.');
+  }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error('No shorts generated. Please try again with a different video.');
+  }
+
+  return parsed.slice(0, 10);
+}
+
+// ── RENDER ──
+function renderResults(data) {
+  document.getElementById('status-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  document.getElementById('countBadge').textContent = data.length + ' Ready ✅';
+
+  const list = document.getElementById('shortsList');
+  list.innerHTML = '';
+
+  data.forEach((s, i) => {
+    const grad = GRADS[i % GRADS.length];
+    const capPrev = (s.caption || '').slice(0, 85) + ((s.caption || '').length > 85 ? '...' : '');
+    const card = document.createElement('div');
+    card.className = 'short-card';
+    card.style.animationDelay = (i * 60) + 'ms';
+    card.innerHTML = `
+      <div class="tiktok-preview">
+        <div class="preview-bg" style="background:${grad}"></div>
+        <div class="preview-content">
+          <div class="preview-top-row">
+            <div class="badge-num">SHORT #${s.n || i+1}</div>
+            <div class="badge-dur">⏱ 30s</div>
+          </div>
+          <div class="preview-mid">
+            <div class="play-ring">▶</div>
+            <div class="hook-text">${esc(s.hook || s.title)}</div>
+          </div>
+          <div class="caption-bar">
+            <div class="cap-label">📝 Caption</div>
+            <div class="cap-preview">${esc(capPrev)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${esc(s.title)}</div>
+        <div class="card-meta">
+          <span class="meta-chip">1080×1920 HD</span>
+          <span class="meta-chip">9:16</span>
+          <span class="meta-chip">30s</span>
+          <span class="meta-chip">TikTok Ready</span>
+        </div>
+        <div class="ts-row">
+          <div class="ts-badge">▶ ${s.start}</div>
+          <div class="ts-arrow">→</div>
+          <div class="ts-badge">⏹ ${s.end}</div>
+        </div>
+        <div class="full-cap-box">${esc(s.caption || '')}</div>
+        <div class="action-row">
+          <button class="btn-act btn-srt" onclick="downloadSRT(${i})">⬇ .SRT File</button>
+          <button class="btn-act btn-cap" onclick="copyCaption(${i})">📋 Copy</button>
+        </div>
+        <button class="btn-capcut" style="margin-top:8px" onclick="openCapCut(${i})">
+          ✂️ Open CapCut → Edit This Short
+        </button>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── ACTIONS ──
+function openCapCut(i) {
+  const s = shorts[i];
+  if (!s) return;
+  const txt = `Short #${s.n||i+1}: ${s.title}\nTimestamp: ${s.start} → ${s.end}\n\nCaption:\n${s.caption}`;
+  navigator.clipboard.writeText(txt).catch(() => {});
+  showToast('Info copied! Opening CapCut...');
+  setTimeout(() => {
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    window.open(isIOS
+      ? 'https://apps.apple.com/app/capcut/id1500855883'
+      : 'https://play.google.com/store/apps/details?id=com.lemon.lvoverseas', '_blank');
+  }, 700);
+}
+
+function downloadSRT(i) {
+  const s = shorts[i];
+  if (!s) return;
+  const words = (s.caption || '').split(' ');
+  const wps = words.length / 30;
+  let srt = ''; let line = 1;
+  const chunk = 7;
+  for (let w = 0; w < words.length; w += chunk) {
+    const part = words.slice(w, w + chunk).join(' ');
+    const t1 = w / wps, t2 = Math.min((w + chunk) / wps, 30);
+    srt += `${line}\n${fmtSRT(t1)} --> ${fmtSRT(t2)}\n${part}\n\n`;
+    line++;
+  }
+  const blob = new Blob([srt], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `short_${i+1}_caption.srt`;
+  a.click();
+  showToast('SRT file downloaded!');
+}
+
+function fmtSRT(sec) {
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60),
+        s2 = Math.floor(sec % 60), ms = Math.round((sec % 1) * 1000);
+  return `${p2(h)}:${p2(m)}:${p2(s2)},${String(ms).padStart(3,'0')}`;
+}
+
+function p2(n) { return String(Math.floor(n)).padStart(2, '0'); }
+
+function copyCaption(i) {
+  const s = shorts[i];
+  if (!s) return;
+  const txt = `Short #${s.n||i+1}: ${s.title}\nTimestamp: ${s.start} → ${s.end}\n\n${s.caption}`;
+  navigator.clipboard.writeText(txt).then(() => showToast('Caption copied!')).catch(() => showToast('Hold & paste manually'));
+}
+
+function downloadAll() {
+  if (!shorts.length) return;
+  let content = `SHORTCRAFT AI — ALL CAPTIONS\nVideo: ${vidTitle}\nDate: ${new Date().toLocaleString()}\n\n${'='.repeat(48)}\n\n`;
+  shorts.forEach((s, i) => {
+    content += `SHORT #${s.n||i+1}: ${s.title}\nTimestamp: ${s.start} → ${s.end}\nHook: ${s.hook||''}\nTopic: ${s.topic||''}\nWhy Viral: ${s.viral||''}\n\nCAPTION:\n${s.caption||''}\n\n${'-'.repeat(40)}\n\n`;
+  });
+  const blob = new Blob([content], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `shortcraft_${sanitize(vidTitle)}.txt`;
+  a.click();
+  showToast('All captions downloaded!');
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorCard');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = '⚠️ ' + msg.replace(/\n/g, '<br>');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sanitize(s) { return (s||'video').replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,40); }
+
+document.getElementById('urlInput').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+</script>
+</body>
+</html>
